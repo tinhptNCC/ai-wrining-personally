@@ -46,26 +46,26 @@ export class User {
     length: 255,
     nullable: true,
   })
-  full_name?: string;
+  fullName?: string;
 
   @Column({
     name: 'is_active',
     type: 'boolean',
     default: true,
   })
-  is_active!: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp with time zone',
   })
-  created_at!: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
     type: 'timestamp with time zone',
   })
-  updated_at!: Date;
+  updatedAt!: Date;
 
   // Relations
   @OneToMany(() => Writing, (writing) => writing.user)

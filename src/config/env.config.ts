@@ -20,7 +20,11 @@ export const ENV = {
 
   JWT: {
     SECRET: process.env.JWT_SECRET,
-    EXPIRES: process.env.JWT_EXPIRATION_TIME,
-    COOKIE_NAME: process.env.JWT_COOKIE_NAME,
+    EXPIRES: process.env.JWT_EXPIRATION_TIME || '3600',
+    COOKIE_NAME: process.env.JWT_COOKIE_NAME || 'token',
+  },
+
+  OPENAI: {
+    API_KEY: process.env.OPENAI_API_KEY,
   },
 };
