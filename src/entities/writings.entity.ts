@@ -21,7 +21,7 @@ export class Writing {
     type: 'uuid',
     nullable: false,
   })
-  user_id!: string;
+  userId!: string;
 
   @Column({
     name: 'title',
@@ -58,13 +58,13 @@ export class Writing {
     name: 'created_at',
     type: 'timestamp with time zone',
   })
-  created_at!: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
     type: 'timestamp with time zone',
   })
-  updated_at!: Date;
+  updatedAt!: Date;
 
   @ManyToOne(() => User, (user) => user.writings)
   @JoinColumn({

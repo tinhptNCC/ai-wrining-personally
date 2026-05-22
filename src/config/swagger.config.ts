@@ -8,7 +8,7 @@ export const setupSwagger = (app: INestApplication) => {
     .setDescription('NestJS API description')
     .setVersion('1.0')
     .addTag('nestjs')
-    .addCookieAuth(ENV.COOKIE.ACCESS_TOKEN_TIME)
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, options);

@@ -20,33 +20,33 @@ export class Analysis {
     type: 'uuid',
     nullable: false,
   })
-  writing_id!: string;
+  writingId!: string;
 
   @Column({
     name: 'user_id',
     type: 'uuid',
     nullable: false,
   })
-  user_id!: string;
+  userId!: string;
 
   @Column({
     name: 'feedback_json',
     type: 'jsonb',
     nullable: true,
   })
-  feedback_json?: object;
+  feedbackJson?: object;
 
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp with time zone',
   })
-  created_at!: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
     type: 'timestamp with time zone',
   })
-  updated_at!: Date;
+  updatedAt!: Date;
 
   // Relations
   @ManyToOne(() => Writing, (writing) => writing.analyses)
