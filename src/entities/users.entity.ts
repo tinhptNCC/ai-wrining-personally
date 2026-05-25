@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Writing } from './writings.entity';
 import { Analysis } from './analysis.entity';
+import { UserTokenUsage } from './user-token-usage.entity';
 
 @Entity({ name: 'users', schema: 'public' })
 export class User {
@@ -73,4 +74,7 @@ export class User {
 
   @OneToMany(() => Analysis, (analysis) => analysis.user)
   analyses!: Analysis[];
+
+  @OneToMany(() => UserTokenUsage, (tokenUsage) => tokenUsage.user)
+  tokenUsages!: UserTokenUsage[];
 }

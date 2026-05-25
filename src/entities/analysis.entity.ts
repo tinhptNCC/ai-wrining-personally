@@ -50,6 +50,11 @@ export class Analysis {
 
   // Relations
   @ManyToOne(() => Writing, (writing) => writing.analyses)
+  @JoinColumn({
+    name: 'writing_id',
+    referencedColumnName: 'id',
+    foreignKeyConstraintName: 'fk_analysis_writing_id',
+  })
   writing!: Writing;
 
   @ManyToOne(() => User, (user) => user.analyses)

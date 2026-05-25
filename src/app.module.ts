@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConfiguration } from './config';
+import { AnalysisModule } from './modules/analysis/analysis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { WritingsModule } from './modules/writings/writings.module';
-import { AnalysisModule } from './modules/analysis/analysis.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AnalysisModule } from './modules/analysis/analysis.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     WritingsModule,
     AnalysisModule,
