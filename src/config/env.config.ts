@@ -3,7 +3,8 @@ import { config } from 'dotenv';
 config();
 
 export const ENV = {
-  APP_PORT: process.env.APP_PORT ?? 3000,
+  APP_PORT: process.env.APP_PORT ?? 8000,
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
 
   DATABASE: {
     HOST: process.env.DB_HOST,

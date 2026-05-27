@@ -162,7 +162,8 @@ export class WritingsService {
       );
     }
 
-    await this.writingRepository.remove(writing);
+    // Use delete() instead of remove() to leverage database-level CASCADE DELETE
+    await this.writingRepository.delete(id);
 
     return { message: `Writing with ID ${id} has been deleted successfully` };
   }
@@ -175,7 +176,12 @@ export class WritingsService {
       throw new BadRequestException('User ID is required');
     }
 
-    const stats = await this.writingRepository
+    const totalCount = await this.writingRepository.count({
+      where: { userId },
+    });
+
+    // Get stats by status
+    const statsByStatus = await this.writingRepository
       .createQueryBuilder('writing')
       .select('COUNT(writing.id)', 'total')
       .addSelect('writing.status', 'status')
@@ -183,7 +189,8 @@ export class WritingsService {
       .groupBy('writing.status')
       .getRawMany();
 
-    const byType = await this.writingRepository
+    // Get stats by type
+    const statsByType = await this.writingRepository
       .createQueryBuilder('writing')
       .select('COUNT(writing.id)', 'count')
       .addSelect('writing.type', 'type')
@@ -191,13 +198,36 @@ export class WritingsService {
       .groupBy('writing.type')
       .getRawMany();
 
-    const totalCount = await this.writingRepository.count({
-      where: { userId },
+    // Calculate word counts
+    const wordStats = await this.writingRepository
+      .createQueryBuilder('writing')
+      .select(
+        "SUM(LENGTH(writing.content) - LENGTH(REPLACE(writing.content, ' ', ''))) + COUNT(writing.id)",
+        'totalWords',
+      )
+      .addSelect(
+        "AVG(LENGTH(writing.content) - LENGTH(REPLACE(writing.content, ' ', ''))) + 1",
+        'averageLength',
+      )
+      .where('writing.userId = :userId', { userId })
+      .getRawOne();
+
+    // Normalize response format with records instead of arrays
+    const byStatus: Record<string, number> = {};
+    statsByStatus.forEach((item) => {
+      byStatus[item.status] = parseInt(item.total, 10);
+    });
+
+    const byType: Record<string, number> = {};
+    statsByType.forEach((item) => {
+      byType[item.type] = parseInt(item.count, 10);
     });
 
     return {
       totalWritings: totalCount,
-      byStatus: stats,
+      totalWords: Math.max(0, Math.floor(wordStats?.totalWords || 0)),
+      averageLength: Math.max(0, Math.round(wordStats?.averageLength || 0)),
+      byStatus,
       byType,
     };
   }

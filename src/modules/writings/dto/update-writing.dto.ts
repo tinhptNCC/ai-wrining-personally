@@ -36,7 +36,6 @@ export class UpdateWritingDTO {
   @ApiProperty({
     description: 'Type of writing',
     enum: WritingTypeEnum,
-    example: WritingTypeEnum.JOURNAL,
     required: false,
   })
   @IsOptional()
@@ -48,7 +47,6 @@ export class UpdateWritingDTO {
   @ApiProperty({
     description: 'Status of the writing',
     enum: WritingStatusEnum,
-    example: WritingStatusEnum.COMPLETED,
     required: false,
   })
   @IsOptional()

@@ -1,7 +1,8 @@
 export enum WritingType {
-  JOURNAL_ENTRY = 'journal_entry',
-  SOCIAL_ESSAY = 'social_essay',
-  REFLECTION_PIECE = 'reflection_piece',
+  SOCIAL_ESSAY = 'BÀI LUẬN XÃ HỘI',
+  CATHOLIC_ESSAY = 'BÀI LUẬN CÔNG GIÁO',
+  SHORT_STORY = 'TRUYỆN NGẮN',
+  ARTICLE = 'BÀI BÁO',
 }
 
 export interface OpenAiResponse {
@@ -17,6 +18,7 @@ export interface TokenUsageInfo {
   remaining: number;
   limit: number;
   percentage: number;
+  resetAt: string;
 }
 
 export interface AiAnalysisResult {

@@ -193,11 +193,17 @@ export class TokenTrackerService {
     const remaining = Math.max(0, usage.tokensLimit - usage.tokensUsed);
     const percentage = (usage.tokensUsed / usage.tokensLimit) * 100;
 
+    // Calculate reset time (next day at midnight UTC)
+    const resetAt = new Date(usage.date);
+    resetAt.setDate(resetAt.getDate() + 1);
+    resetAt.setUTCHours(0, 0, 0, 0);
+
     return {
       used: usage.tokensUsed,
       remaining,
       limit: usage.tokensLimit,
       percentage: Math.round(percentage),
+      resetAt: resetAt.toISOString(),
     };
   }
 }

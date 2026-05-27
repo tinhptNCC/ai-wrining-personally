@@ -35,7 +35,6 @@ export class CreateWritingDTO {
   @ApiProperty({
     description: 'Type of writing',
     enum: WritingTypeEnum,
-    example: WritingTypeEnum.JOURNAL,
   })
   @IsNotEmpty({ message: 'Type is required' })
   @IsEnum(WritingTypeEnum, {

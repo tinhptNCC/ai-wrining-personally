@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsEnum,
 } from 'class-validator';
+import { WritingType } from 'src/modules/ai/types/ai.types';
 
 /**
  * DTO for creating an analysis with AI generation
@@ -32,15 +33,15 @@ export class CreateAiAnalysisDTO {
   @ApiProperty({
     description:
       'Type of writing (determines analysis focus and prompt strategy)',
-    enum: ['journal', 'social_essay', 'blog_post', 'short_story', 'article'],
-    example: 'journal',
+    enum: WritingType,
+    example: WritingType.SOCIAL_ESSAY,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['journal', 'social_essay', 'blog_post', 'short_story', 'article'], {
+  @IsEnum(WritingType, {
     message: 'Invalid writing type',
   })
-  writingType?: string;
+  writingType?: WritingType;
 
   @ApiProperty({
     description: 'Optional initial feedback (can be combined with AI analysis)',

@@ -23,7 +23,6 @@ import { TokenTrackerService } from './services/token-tracker.service';
 import { TokenEstimator } from '../ai/utils/token-estimator';
 import { AiErrorHandler } from '../ai/utils/ai-error-handler';
 import { WritingType } from '../ai/types/ai.types';
-import { extractJson } from 'src/shared';
 
 @Injectable()
 export class AnalysisService {
@@ -153,15 +152,23 @@ export class AnalysisService {
         aiResponse.text,
       );
 
-      if (!parseResult.valid) {
-        this.logger.warn(
-          `Response validation failed for writing ${writing.id}: ${parseResult.errors?.join(', ')}`,
+      if (!parseResult.valid || !parseResult.data) {
+        const errors = parseResult.errors || ['Unable to parse AI response'];
+        this.logger.error(
+          `AI response validation failed for writing ${writing.id}: ${errors.join(', ')}`,
+        );
+
+        throw new HttpException(
+          {
+            message: 'AI analysis generation failed due to invalid AI response',
+            errors,
+            rawContent: parseResult.rawContent,
+          },
+          HttpStatus.BAD_REQUEST,
         );
       }
 
-      const jsonText = extractJson(parseResult.rawContent);
-
-      const parsed = JSON.parse(jsonText);
+      const parsed = parseResult.data;
 
       // Step 6: Create analysis record with AI feedback
       const analysis = new Analysis();
@@ -169,7 +176,7 @@ export class AnalysisService {
       analysis.writingId = dto.writingId;
       analysis.feedbackJson = {
         ...dto.feedbackJson,
-        aiAnalysis: parsed || null,
+        aiAnalysis: parsed,
         validationErrors: parseResult.errors,
         generatedAt: new Date().toISOString(),
         writingType,
@@ -225,14 +232,13 @@ export class AnalysisService {
    */
   private mapWritingTypeToAnalysisType(writingType: string): WritingType {
     const typeMap: { [key: string]: WritingType } = {
-      journal: WritingType.JOURNAL_ENTRY,
-      social_essay: WritingType.SOCIAL_ESSAY,
-      blog_post: WritingType.SOCIAL_ESSAY,
-      short_story: WritingType.REFLECTION_PIECE,
-      article: WritingType.SOCIAL_ESSAY,
+      'BÀI LUẬN XÃ HỘI': WritingType.SOCIAL_ESSAY,
+      'BÀI LUẬN CÔNG GIÁO': WritingType.CATHOLIC_ESSAY,
+      'TRUYỆN NGẮN': WritingType.SHORT_STORY,
+      'BÀI BÁO': WritingType.ARTICLE,
     };
 
-    return typeMap[writingType] || WritingType.JOURNAL_ENTRY;
+    return typeMap[writingType] || WritingType.ARTICLE;
   }
 
   /**
@@ -336,10 +342,10 @@ export class AnalysisService {
     });
 
     return {
-      writingId,
-      title: writing.title,
-      analyses,
-      count: analyses.length,
+      data: analyses,
+      total: analyses.length,
+      limit: 100,
+      offset: 0,
     };
   }
 

@@ -74,6 +74,9 @@ export class Writing {
   })
   user!: User;
 
-  @OneToMany(() => Analysis, (analysis) => analysis.writing)
+  @OneToMany(() => Analysis, (analysis) => analysis.writing, {
+    cascade: ['remove'],
+    onDelete: 'CASCADE',
+  })
   analyses!: Analysis[];
 }

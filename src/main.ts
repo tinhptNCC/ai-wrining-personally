@@ -3,9 +3,13 @@ import { AppModule } from './app.module';
 import { ENV, setupSwagger } from './config';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { CORS_OPTIONS } from './constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable CORS for frontend
+  app.enableCors(CORS_OPTIONS);
 
   app.setGlobalPrefix('api');
 
@@ -22,6 +26,6 @@ async function bootstrap() {
   );
   setupSwagger(app);
 
-  await app.listen(ENV.APP_PORT ?? 3000);
+  await app.listen(ENV.APP_PORT ?? 8000);
 }
 bootstrap();

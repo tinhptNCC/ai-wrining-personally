@@ -99,10 +99,55 @@ export class ResponseParserService {
       return jsonCodeBlockMatch[1].trim();
     }
 
-    // Try to find JSON object directly
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return jsonMatch[0];
+    // Try to robustly extract the first balanced JSON object from the text.
+    // This handles nested objects, strings with escaped quotes, and ignores
+    // braces that appear inside string literals.
+    const firstBraceIndex = content.indexOf('{');
+    if (firstBraceIndex === -1) return null;
+
+    for (
+      let start = firstBraceIndex;
+      start < content.length;
+      start = content.indexOf('{', start + 1)
+    ) {
+      if (start === -1) break;
+      let depth = 0;
+      let inString = false;
+      let escape = false;
+      for (let i = start; i < content.length; i++) {
+        const ch = content[i];
+
+        if (escape) {
+          escape = false;
+          continue;
+        }
+
+        if (ch === '\\') {
+          escape = true;
+          continue;
+        }
+
+        if (ch === '"') {
+          inString = !inString;
+          continue;
+        }
+
+        if (inString) continue;
+
+        if (ch === '{') depth++;
+        else if (ch === '}') depth--;
+
+        if (depth === 0) {
+          const candidate = content.slice(start, i + 1).trim();
+          // quick sanity: must start with { and end with }
+          if (candidate.startsWith('{') && candidate.endsWith('}'))
+            return candidate;
+          break;
+        }
+      }
+
+      // move to next opening brace if any
+      if (start + 1 >= content.length) break;
     }
 
     return null;

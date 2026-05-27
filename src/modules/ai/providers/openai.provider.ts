@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ENV } from 'src/config/env.config';
 import { AiError, AiErrorCode } from '../utils/ai-error-handler';
 import OpenAI from 'openai';
+import { BASE_URL_AI } from 'src/constants';
 
 export interface AiProviderRequest {
   prompt: string;
@@ -24,7 +25,7 @@ export class OpenAiProvider {
   constructor() {
     this.genAi = new OpenAI({
       apiKey: ENV.ONEROUTER.API_KEY,
-      baseURL: 'https://openrouter.ai/api/v1', // Use OpenRouter endpoint
+      baseURL: BASE_URL_AI,
     });
   }
 
