@@ -11,6 +11,7 @@ import { GamificationModule } from './modules/gamification/gamification.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AchievementsModule } from './modules/achievements/achievements.module';
 import { WritingSuggestionsModule } from './modules/writing-suggestions/writing-suggestions.module';
+import { FeedbackCategoriesModule } from './modules/feedback-categories/feedback-categories.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { WritingSuggestionsModule } from './modules/writing-suggestions/writing-
     UsersModule,
     DailyTipsModule,
     AchievementsModule,
+    FeedbackCategoriesModule,
     WritingSuggestionsModule,
     GamificationModule,
   ],

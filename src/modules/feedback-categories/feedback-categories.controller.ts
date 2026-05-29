@@ -1,16 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Request } from '@nestjs/common';
 import { FeedbackCategoriesService } from './feedback-categories.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('api/feedback-categories')
+@Controller('feedback-categories')
 @UseGuards(JwtAuthGuard)
 export class FeedbackCategoriesController {
   constructor(private readonly categoriesService: FeedbackCategoriesService) {}
@@ -30,7 +22,7 @@ export class FeedbackCategoriesController {
   @Get('learning-paths')
   async getLearningPaths(@Request() req: any) {
     const paths = await this.categoriesService.getUserLearningPaths(
-      req.user.id,
+      req.user.userId,
     );
     return { data: paths };
   }
@@ -45,7 +37,7 @@ export class FeedbackCategoriesController {
   ) {
     const path = await this.categoriesService.getSpecificLearningPath(
       categoryKey,
-      req.user.id,
+      req.user.userId,
     );
     return { data: path };
   }

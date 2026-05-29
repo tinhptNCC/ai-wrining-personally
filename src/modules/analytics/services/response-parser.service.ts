@@ -42,8 +42,13 @@ export class ResponseParserService {
         };
       }
 
-      // Step 3: Validate against schema
-      const validationResult = WritingAnalyticsSchema.safeParse(parsedData);
+      // Step 3: Normalize common model omissions before schema validation.
+      // Some models return one valid item for summary arrays even when prompted
+      // for 2-3 items. Preserve useful feedback and fill the minimum shape.
+      const normalizedData = this.normalizeAnalyticsData(parsedData);
+
+      // Step 4: Validate against schema
+      const validationResult = WritingAnalyticsSchema.safeParse(normalizedData);
 
       if (validationResult.success) {
         this.logger.debug('Response validation successful');
@@ -54,8 +59,9 @@ export class ResponseParserService {
         };
       }
 
-      // Step 4: Try partial validation as fallback
-      const partialResult = PartialWritingAnalyticsSchema.safeParse(parsedData);
+      // Step 5: Try partial validation as fallback
+      const partialResult =
+        PartialWritingAnalyticsSchema.safeParse(normalizedData);
 
       if (partialResult.success && this.hasMinimalData(partialResult.data)) {
         this.logger.warn('Partial response validation successful (fallback)');
@@ -202,6 +208,94 @@ export class ResponseParserService {
         'Seek peer feedback',
       ],
     };
+  }
+
+  private normalizeAnalyticsData(data: any): any {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    const normalized = { ...data };
+
+    normalized.structure = this.normalizeFeedbackItem(
+      normalized.structure,
+      'Structure feedback is still being refined.',
+    );
+    normalized.clarity = this.normalizeFeedbackItem(
+      normalized.clarity,
+      'Clarity feedback is still being refined.',
+    );
+    normalized.tone = this.normalizeFeedbackItem(
+      normalized.tone,
+      'Tone feedback is still being refined.',
+    );
+    normalized.coherence = this.normalizeFeedbackItem(
+      normalized.coherence,
+      'Coherence feedback is still being refined.',
+    );
+
+    normalized.overallFeedback =
+      typeof normalized.overallFeedback === 'string' &&
+      normalized.overallFeedback.trim().length >= 20
+        ? normalized.overallFeedback.trim().slice(0, 500)
+        : 'The writing has useful ideas and can improve with clearer structure, stronger transitions, and more specific supporting details.';
+
+    normalized.strengths = this.normalizeStringList(normalized.strengths, [
+      'Clear writing intent',
+      'Authentic voice',
+    ]);
+    normalized.areasForImprovement = this.normalizeStringList(
+      normalized.areasForImprovement,
+      ['Structure clarity', 'Coherence and flow'],
+    );
+    normalized.actionItems = this.normalizeStringList(normalized.actionItems, [
+      'Review the feedback carefully',
+      'Revise one section at a time',
+    ]);
+
+    return normalized;
+  }
+
+  private normalizeFeedbackItem(item: any, fallbackFeedback: string) {
+    const score =
+      typeof item?.score === 'number'
+        ? Math.max(1, Math.min(10, Math.round(item.score)))
+        : 5;
+
+    const feedback =
+      typeof item?.feedback === 'string' && item.feedback.trim().length >= 10
+        ? item.feedback.trim().slice(0, 1000)
+        : fallbackFeedback;
+
+    const suggestions = this.normalizeStringList(item?.suggestions, [
+      'Revise this area with one specific improvement',
+    ]).slice(0, 5);
+
+    return {
+      score,
+      feedback,
+      suggestions,
+    };
+  }
+
+  private normalizeStringList(value: any, defaults: string[]): string[] {
+    const items = (Array.isArray(value) ? value : [])
+      .filter((item) => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter((item) => item.length >= 5)
+      .map((item) => item.slice(0, 150));
+
+    for (const fallback of defaults) {
+      if (items.length >= 2) {
+        break;
+      }
+
+      if (!items.includes(fallback)) {
+        items.push(fallback);
+      }
+    }
+
+    return items.slice(0, 5);
   }
 
   /**

@@ -1,36 +1,67 @@
 export function extractJson(text: string): string {
+  return extractJsonValue(text, ['{']);
+}
+
+export function extractJsonArray(text: string): string {
+  return extractJsonValue(text, ['[']);
+}
+
+export function extractJsonValue(
+  text: string,
+  allowedStarts: Array<'{' | '['> = ['{', '['],
+): string {
   if (!text) {
     throw new Error('Empty response');
   }
 
-  // Remove markdown fences
   const cleaned = text
     .replace(/```json/g, '')
     .replace(/```/g, '')
     .trim();
 
-  // Find first opening brace
-  const firstBrace = cleaned.indexOf('{');
+  const startIndex = findFirstJsonStart(cleaned, allowedStarts);
 
-  if (firstBrace === -1) {
-    throw new Error('No JSON object found');
+  if (startIndex === -1) {
+    throw new Error('No JSON value found');
   }
 
-  // Try to balance braces
-  let braceCount = 0;
+  const openingChar = cleaned[startIndex] as '{' | '[';
+  const closingChar = openingChar === '{' ? '}' : ']';
+  let depth = 0;
   let endIndex = -1;
+  let inString = false;
+  let escaped = false;
 
-  for (let i = firstBrace; i < cleaned.length; i++) {
+  for (let i = startIndex; i < cleaned.length; i++) {
     const char = cleaned[i];
 
-    if (char === '{') {
-      braceCount++;
+    if (escaped) {
+      escaped = false;
+      continue;
     }
 
-    if (char === '}') {
-      braceCount--;
+    if (char === '\\') {
+      escaped = inString;
+      continue;
+    }
 
-      if (braceCount === 0) {
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (char === openingChar) {
+      depth++;
+    }
+
+    if (char === closingChar) {
+      depth--;
+
+      if (depth === 0) {
         endIndex = i;
         break;
       }
@@ -38,8 +69,19 @@ export function extractJson(text: string): string {
   }
 
   if (endIndex === -1) {
-    throw new Error('Incomplete JSON object');
+    throw new Error('Incomplete JSON value');
   }
 
-  return cleaned.slice(firstBrace, endIndex + 1);
+  return cleaned.slice(startIndex, endIndex + 1);
+}
+
+function findFirstJsonStart(
+  text: string,
+  allowedStarts: Array<'{' | '['>,
+): number {
+  const indexes = allowedStarts
+    .map((char) => text.indexOf(char))
+    .filter((index) => index >= 0);
+
+  return indexes.length > 0 ? Math.min(...indexes) : -1;
 }

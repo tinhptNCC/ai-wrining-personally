@@ -11,7 +11,7 @@ import {
 import { DailyTipsService } from './daily-tips.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('api/daily-tips')
+@Controller('daily-tips')
 @UseGuards(JwtAuthGuard)
 export class DailyTipsController {
   constructor(private readonly dailyTipsService: DailyTipsService) {}
@@ -21,7 +21,7 @@ export class DailyTipsController {
    */
   @Get('today')
   async getTodaysTip(@Request() req: any) {
-    const tip = await this.dailyTipsService.getDailyTip(req.user.id);
+    const tip = await this.dailyTipsService.getDailyTip(req.user.userId);
     return { data: tip };
   }
 
@@ -35,7 +35,7 @@ export class DailyTipsController {
     @Query('offset') offset: string = '0',
   ) {
     const result = await this.dailyTipsService.getUserTips(
-      req.user.id,
+      req.user.userId,
       parseInt(limit),
       parseInt(offset),
     );
@@ -51,7 +51,7 @@ export class DailyTipsController {
     @Param('category') category: string,
   ) {
     const tips = await this.dailyTipsService.getTipsByCategory(
-      req.user.id,
+      req.user.userId,
       category,
     );
     return { data: tips };
@@ -62,7 +62,9 @@ export class DailyTipsController {
    */
   @Get('unread/count')
   async getUnreadCount(@Request() req: any) {
-    const count = await this.dailyTipsService.getUnreadTipsCount(req.user.id);
+    const count = await this.dailyTipsService.getUnreadTipsCount(
+      req.user.userId,
+    );
     return { count };
   }
 
@@ -71,7 +73,10 @@ export class DailyTipsController {
    */
   @Patch(':id/mark-as-read')
   async markAsRead(@Param('id') tipId: string, @Request() req: any) {
-    const tip = await this.dailyTipsService.markTipAsRead(tipId, req.user.id);
+    const tip = await this.dailyTipsService.markTipAsRead(
+      tipId,
+      req.user.userId,
+    );
     return { data: tip };
   }
 
@@ -87,7 +92,7 @@ export class DailyTipsController {
       ? categories.split(',')
       : ['grammar', 'vocabulary', 'punctuation'];
     const tip = await this.dailyTipsService.generateDailyTip(
-      req.user.id,
+      req.user.userId,
       categoryList,
     );
     return { data: tip };

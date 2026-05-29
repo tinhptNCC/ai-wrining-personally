@@ -12,7 +12,7 @@ import {
 import { WritingSuggestionsService } from './writing-suggestions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('api/writing-suggestions')
+@Controller('writing-suggestions')
 @UseGuards(JwtAuthGuard)
 export class WritingSuggestionsController {
   constructor(private readonly suggestionsService: WritingSuggestionsService) {}
@@ -27,7 +27,7 @@ export class WritingSuggestionsController {
   ) {
     const suggestions = await this.suggestionsService.getWritingSuggestions(
       writingId,
-      req.user.id,
+      req.user.userId,
     );
     return { data: suggestions };
   }
@@ -42,7 +42,7 @@ export class WritingSuggestionsController {
   ) {
     const suggestions = await this.suggestionsService.generateSuggestions(
       body.writingId,
-      req.user.id,
+      req.user.userId,
       body,
     );
     return { data: suggestions };
@@ -59,7 +59,7 @@ export class WritingSuggestionsController {
   ) {
     const suggestions = await this.suggestionsService.getSuggestionsBySeverity(
       writingId,
-      req.user.id,
+      req.user.userId,
       severity,
     );
     return { data: suggestions };
@@ -78,7 +78,7 @@ export class WritingSuggestionsController {
     const suggestion = await this.suggestionsService.applySuggestion(
       suggestionId,
       writingId,
-      req.user.id,
+      req.user.userId,
       updateWriting === 'true',
     );
     return { data: suggestion };
@@ -94,7 +94,7 @@ export class WritingSuggestionsController {
   ) {
     const stats = await this.suggestionsService.getSuggestionStats(
       writingId,
-      req.user.id,
+      req.user.userId,
     );
     return { data: stats };
   }
@@ -109,7 +109,7 @@ export class WritingSuggestionsController {
   ) {
     const refactored = await this.suggestionsService.getRefactoredVersion(
       writingId,
-      req.user.id,
+      req.user.userId,
     );
     return { data: refactored };
   }
@@ -126,7 +126,7 @@ export class WritingSuggestionsController {
     const suggestions =
       await this.suggestionsService.getHighConfidenceSuggestions(
         writingId,
-        req.user.id,
+        req.user.userId,
         parseFloat(threshold),
       );
     return { data: suggestions };

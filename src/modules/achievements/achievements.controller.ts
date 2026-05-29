@@ -9,7 +9,7 @@ import {
 import { AchievementsService } from './achievements.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('api/achievements')
+@Controller('achievements')
 @UseGuards(JwtAuthGuard)
 export class AchievementsController {
   constructor(private readonly achievementsService: AchievementsService) {}
@@ -29,7 +29,7 @@ export class AchievementsController {
   @Get('my')
   async getUserAchievements(@Request() req: any) {
     const achievements = await this.achievementsService.getUserAchievements(
-      req.user.id,
+      req.user.userId,
     );
     return { data: achievements };
   }
@@ -40,7 +40,7 @@ export class AchievementsController {
   @Get('unlocked')
   async getUnlockedAchievements(@Request() req: any) {
     const achievements = await this.achievementsService.getUnlockedAchievements(
-      req.user.id,
+      req.user.userId,
     );
     return { data: achievements };
   }
@@ -55,7 +55,7 @@ export class AchievementsController {
   ) {
     const result = await this.achievementsService.getAchievementDetail(
       achievementId,
-      req.user.id,
+      req.user.userId,
     );
     return result;
   }
@@ -65,7 +65,7 @@ export class AchievementsController {
    */
   @Get('stats/my')
   async getUserStats(@Request() req: any) {
-    const stats = await this.achievementsService.getUserStats(req.user.id);
+    const stats = await this.achievementsService.getUserStats(req.user.userId);
     return { data: stats };
   }
 

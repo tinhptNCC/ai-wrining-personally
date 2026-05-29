@@ -3,6 +3,7 @@ import { ENV } from 'src/config/env.config';
 import { AiError, AiErrorCode } from '../utils/ai-error-handler';
 import OpenAI from 'openai';
 import { BASE_URL_AI } from 'src/constants';
+import { extractJson, extractJsonArray } from 'src/shared';
 
 export interface AiProviderRequest {
   prompt: string;
@@ -137,7 +138,8 @@ export class OpenAiProvider {
   }> {
     const prompt = `Generate a brief daily writing tip about ${category}. 
     
-    Format your response as JSON with the following fields:
+    Return only valid JSON. Do not include markdown fences or explanatory text.
+    Use exactly this JSON object shape:
     {
       "title": "A catchy title for the tip",
       "content": "2-3 sentences explaining the writing tip",
@@ -152,7 +154,7 @@ export class OpenAiProvider {
         maxTokens: 500,
       });
 
-      const parsed = JSON.parse(response.text);
+      const parsed = JSON.parse(extractJson(response.text));
       return {
         title: parsed.title || 'Daily Writing Tip',
         content: parsed.content || '',
@@ -214,7 +216,7 @@ export class OpenAiProvider {
         maxTokens: 1500,
       });
 
-      const parsed = JSON.parse(response.text);
+      const parsed = JSON.parse(extractJsonArray(response.text));
       const suggestions = Array.isArray(parsed) ? parsed : [parsed];
 
       return suggestions.map((s: any) => ({
